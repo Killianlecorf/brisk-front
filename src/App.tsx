@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import request from './utils/request';
 
 interface User {
   _id: string;
@@ -19,59 +18,77 @@ function App() {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await request('', 'GET');
-      if (response.ok) {
-        setData(response.data);
+    fetch('http://localhost:5253/users')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Erreur lors du chargement des utilisateurs');
+        }
+        return response.json();
+      })
+      .then((data: User[]) => {
+        setData(data);
         setLoading(false);
-      } else {
-        setError(response.message);
+      })
+      .catch((error) => {
+        setError(error.message);
         setLoading(false);
-      }
-    };
+      });
+  }, [data]);
 
-    fetchData();
-  }, []);
-
-  const handleDelete = async (id: string) => {
-    const response = await request(`${id}`, 'DELETE');
-    if (response.ok) {
-      setData(data.filter((user) => user._id !== id)); 
-    } else {
-      setError('Erreur lors de la suppression');
-    }
+  const handleDelete = (id: string) => {
+    fetch(`http://localhost:5253/${id}`, {
+      method: 'DELETE',
+    })
+      .then(() => {
+        setData(data.filter((user) => user._id !== id));
+      })
+      .catch((error) => {
+        setError('Erreur lors de la suppression');
+      });
   };
 
-  const handleAddUser = async (e: React.FormEvent) => {
+  const handleAddUser = (e: React.FormEvent) => {
     e.preventDefault();
 
     const user = { ...newUser };
 
-    const response = await request('', 'POST', user);
-    if (response.ok) {
-      setData((prevData) => [...prevData, response.data]);
-      setNewUser({ username: '', email: '' });
-    } else {
-      setError('Erreur lors de l\'ajout de l\'utilisateur');
-    }
+    fetch('http://localhost:5253/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user),
+    })
+      .then((response) => response.json())
+      .then((data: User) => {
+        setData((prevData) => [...prevData, data]);
+        setNewUser({ username: '', email: '' });
+      })
+      .catch((error) => {
+        setError('Erreur lors de l\'ajout de l\'utilisateur');
+      });
   };
 
-  const handleEditUser = async (e: React.FormEvent, id: string) => {
+  const handleEditUser = (e: React.FormEvent, id: string) => {
     e.preventDefault();
 
     const updatedUser = { ...editUser };
 
-    const response = await request(`${id}`, 'PUT', updatedUser);
-    if (response.ok) {
-      setData((prevData) =>
-        prevData.map((user) =>
-          user._id === id ? { ...user, username: response.data.username, email: response.data.email } : user
-        )
-      );
-      setEditUser({ id: '', username: '', email: '' });
-    } else {
-      setError('Erreur lors de la mise à jour de l\'utilisateur');
-    }
+    fetch(`http://localhost:5253/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedUser),
+    })
+      .then((response) => response.json())
+      .then((updatedUserData: User) => {
+        setData((prevData) =>
+          prevData.map((user) =>
+            user._id === id ? { ...user, username: updatedUserData.username, email: updatedUserData.email } : user
+          )
+        );
+        setEditUser({ id: '', username: '', email: '' });
+      })
+      .catch((error) => {
+        setError('Erreur lors de la mise à jour de l\'utilisateur');
+      });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,7 +128,7 @@ function App() {
           onChange={handleInputChange}
         />
         <input
-          type="email"
+          type="text"
           name="email"
           placeholder="Email"
           value={newUser.email}
@@ -130,7 +147,7 @@ function App() {
             onChange={handleEditInputChange}
           />
           <input
-            type="email"
+            type="text"
             name="email"
             placeholder="Nouveau Email"
             value={editUser.email}
