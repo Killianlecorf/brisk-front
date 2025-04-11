@@ -36,7 +36,7 @@ function App() {
   }, [data]);
 
   const handleDelete = (id: string) => {
-    fetch(`http://localhost:5253/${id}`, {
+    fetch(`http://localhost:5253/users/${id}`, {
       method: 'DELETE',
     })
       .then(() => {
@@ -52,7 +52,7 @@ function App() {
 
     const user = { ...newUser };
 
-    fetch('http://localhost:5253/', {
+    fetch('http://localhost:5253/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(user),
@@ -72,7 +72,7 @@ function App() {
 
     const updatedUser = { ...editUser };
 
-    fetch(`http://localhost:5253/${id}`, {
+    fetch(`http://localhost:5253/users/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedUser),
