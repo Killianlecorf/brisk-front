@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import './App.css';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import UserDetail from './userDetails';
 
 interface User {
   _id: string;
@@ -116,70 +119,79 @@ function App() {
   }
 
   return (
-    <div>
-      <h1>To-Do List - Utilisateurs</h1>
-      
-      <form onSubmit={handleAddUser}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Nom d'utilisateur"
-          value={newUser.username}
-          onChange={handleInputChange}
-        />
-        <input
-          type="text"
-          name="email"
-          placeholder="Email"
-          value={newUser.email}
-          onChange={handleInputChange}
-        />
-        <button type="submit">Ajouter</button>
-      </form>
+    <Router>
+      <div>
+        <h1>To-Do List - Utilisateurs</h1>
 
-      {editUser.id && (
-        <form onSubmit={(e) => handleEditUser(e, editUser.id)}>
+        <form onSubmit={handleAddUser}>
           <input
             type="text"
             name="username"
-            placeholder="Nouveau Nom d'utilisateur"
-            value={editUser.username}
-            onChange={handleEditInputChange}
+            placeholder="Nom d'utilisateur"
+            value={newUser.username}
+            onChange={handleInputChange}
           />
           <input
             type="text"
             name="email"
-            placeholder="Nouveau Email"
-            value={editUser.email}
-            onChange={handleEditInputChange}
+            placeholder="Email"
+            value={newUser.email}
+            onChange={handleInputChange}
           />
-          <button type="submit">Mettre à jour</button>
+          <button type="submit">Ajouter</button>
         </form>
-      )}
 
-      <ul>
-        {data.map((user) => (
-          <li key={user._id}>
-            <div>
-              <h3>{user.username}</h3>
-              <p>Email: {user.email}</p>
-              <button onClick={() => handleDelete(user._id)}>Supprimer</button>
-              <button
-                onClick={() =>
-                  setEditUser({
-                    id: user._id,
-                    username: user.username,
-                    email: user.email,
-                  })
-                }
-              >
-                Modifier
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
+        {editUser.id && (
+          <form onSubmit={(e) => handleEditUser(e, editUser.id)}>
+            <input
+              type="text"
+              name="username"
+              placeholder="Nouveau Nom d'utilisateur"
+              value={editUser.username}
+              onChange={handleEditInputChange}
+            />
+            <input
+              type="text"
+              name="email"
+              placeholder="Nouveau Email"
+              value={editUser.email}
+              onChange={handleEditInputChange}
+            />
+            <button type="submit">Mettre à jour</button>
+          </form>
+        )}
+
+        <ul>
+          {data.map((user) => (
+            <li key={user._id}>
+              <div>
+                <h3>{user.username}</h3>
+                <p>Email: {user.email}</p>
+                <button onClick={() => handleDelete(user._id)}>Supprimer</button>
+                <button
+                  onClick={() =>
+                    setEditUser({
+                      id: user._id,
+                      username: user.username,
+                      email: user.email,
+                    })
+                  }
+                >
+                  Modifier
+                </button>
+                <Link to={`/user/${user._id}`}>
+                  <button className='ShowButton'>Voir</button>
+                </Link>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <Routes>
+          <Route path="/user/:id" element={<UserDetail />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
